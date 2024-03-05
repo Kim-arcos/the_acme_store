@@ -1,3 +1,4 @@
+const pg = require('pg');
 const { Client } = require("pg");
 const uuid = require("uuid");
 const bcrypt = require("bcrypt");
@@ -27,8 +28,8 @@ async function createTables() {
         id UUID PRIMARY KEY,
         product_id UUID REFERENCES product,
         user_id UUID REFERENCES users,
-        CONSTRAINT favorite UNIQUE(product_id, user_id)
-    );
+        CONSTRAINT unique_user_id_and_product_id UNIQUE (user_id, product_id)
+        );
 
     -- Add ORDER BY clause to sort the results by id column
     SELECT * FROM users ORDER BY id;
@@ -83,6 +84,7 @@ async function createFavorite(user_id, product) {
   VALUES ($1, $2, $3);
   `;
   await client.query(SQL, [uuid.v4(), user_id, product]);
+  return response.rows;
 }
 
 async function fetchFavorite(user_id) {
